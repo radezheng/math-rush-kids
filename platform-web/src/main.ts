@@ -111,16 +111,16 @@ window.addEventListener('keydown', (event) => {
 });
 
 const OPERATION_META: Array<{ id: Operation; label: string; icon: string; hint: string }> = [
-  { id: 'add', label: '加法', icon: '+', hint: '越算越开心' },
-  { id: 'subtract', label: '减法', icon: '−', hint: '默认不出负数' },
-  { id: 'multiply', label: '乘法', icon: '×', hint: '乘法小火箭' },
-  { id: 'divide', label: '除法', icon: '÷', hint: '默认整除题' },
+  { id: 'add', label: '加法', icon: '+', hint: '从简单开始冲' },
+  { id: 'subtract', label: '减法', icon: '−', hint: '越算越稳当' },
+  { id: 'multiply', label: '乘法', icon: '×', hint: '挑战乘法节奏' },
+  { id: 'divide', label: '除法', icon: '÷', hint: '整整齐齐来闯关' },
 ];
 
 const DIFFICULTY_META: Array<{ id: Difficulty; label: string; hint: string }> = [
-  { id: 'easy', label: '轻松', hint: '更适合热身' },
-  { id: 'normal', label: '普通', hint: '默认挑战节奏' },
-  { id: 'challenge', label: '挑战', hint: '数字更大更带劲' },
+  { id: 'easy', label: '轻松', hint: '先热热身' },
+  { id: 'normal', label: '普通', hint: '节奏刚刚好' },
+  { id: 'challenge', label: '挑战', hint: '来点更强考验' },
 ];
 
 let isSettingsExpanded = false;
@@ -167,7 +167,7 @@ function render(state: SessionState): void {
 
   const footer = document.createElement('footer');
   footer.className = 'footer-note';
-  footer.textContent = '大按钮 + 数字键盘答题，适合小朋友快速开始。';
+  footer.textContent = '选好玩法就开冲，看看这次能拿几颗星！';
   shell.appendChild(footer);
 
   app.appendChild(shell);
@@ -185,13 +185,13 @@ function renderHome(state: SessionState): HTMLElement {
     <div class="panel-banner compact-home-banner">
       <div class="home-hero-copy">
         <div class="home-hero-topline">
-          <div class="eyebrow">Math Rush Kids</div>
-          <div class="banner-badge">Milestone 1 浏览器可玩版</div>
+          <div class="eyebrow">数学闯关小游戏</div>
+          <div class="banner-badge">随时开练</div>
         </div>
         <div class="home-title-row">
           <div>
             <h1>口算冲冲冲</h1>
-            <p>标题、状态和开始入口都收进同一张主卡里，打开就能直接开练。</p>
+            <p>选好玩法，马上开始一局快乐口算挑战。</p>
           </div>
           <div class="mascot-card compact-mascot-card">
             <div class="mascot">🦊</div>
@@ -208,14 +208,14 @@ function renderHome(state: SessionState): HTMLElement {
             <strong>${bestAccuracy}</strong>
           </div>
           <div class="hero-stat compact-stat compact-stat-summary">
-            <span class="stat-label">本次将开始</span>
+            <span class="stat-label">这次挑战</span>
             <strong>${quickStartSummary}</strong>
           </div>
         </div>
       </div>
     </div>
     <div class="section-title">选择运算</div>
-    <div class="section-subtitle">支持多选，什么都不选时会自动兜底成“加法 + 减法”。</div>
+    <div class="section-subtitle">可以多选玩法；如果还没选，就先从加法和减法开始。</div>
   `;
 
   const opGrid = document.createElement('div');
@@ -241,7 +241,7 @@ function renderHome(state: SessionState): HTMLElement {
       🚀 快速开始
       <small>${quickStartSummary}</small>
     </button>
-    <div class="quick-note">没选运算也能开玩，系统会自动补上基础练习；开始时会直接按当前设置出题。</div>
+    <div class="quick-note">点一下就出发，题目会按你现在选好的玩法和难度来准备。</div>
   `;
   actionRow.querySelector<HTMLButtonElement>('.start-btn')?.addEventListener('click', () => runtime.startGame(state.settings));
   panel.appendChild(actionRow);
@@ -251,7 +251,7 @@ function renderHome(state: SessionState): HTMLElement {
   settingsCard.innerHTML = `
     <button class="settings-toggle" type="button" aria-expanded="${isSettingsExpanded ? 'true' : 'false'}">
       <span>
-        <span class="section-title settings-title">自定义设置</span>
+        <span class="section-title settings-title">挑战设置</span>
         <strong>${formatSettingsSummary(state)}</strong>
       </span>
       <span class="settings-toggle-icon">${isSettingsExpanded ? '收起' : '展开'}</span>
@@ -264,7 +264,7 @@ function renderHome(state: SessionState): HTMLElement {
           <strong>${state.settings.questionCount} 题</strong>
         </label>
         <label class="setting-item">
-          <span>数值范围（多少以内）</span>
+          <span>数字范围</span>
           <input class="slider max-slider" type="range" min="10" max="100" step="5" value="${state.settings.maxNumber}" />
           <strong>${state.settings.maxNumber} 以内</strong>
         </label>
@@ -308,7 +308,7 @@ function renderQuestion(state: SessionState): HTMLElement {
   panel.className = 'panel question-panel';
   const question = state.question;
   if (!question) {
-    panel.textContent = '题目准备中…';
+    panel.textContent = '马上出题…';
     return panel;
   }
 
@@ -318,13 +318,13 @@ function renderQuestion(state: SessionState): HTMLElement {
         <div class="section-title">第 ${state.questionNumber} / ${state.progress.total} 题</div>
         <div class="tiny-note">答对 ${state.progress.correctCount} 题 · 当前连对 ${state.progress.streak} 题</div>
       </div>
-      <button class="ghost-btn" type="button">回首页</button>
+      <button class="ghost-btn" type="button">返回首页</button>
     </div>
     <div class="question-card">
-      <div class="question-badge">${question.operation === 'add' ? '加法' : question.operation === 'subtract' ? '减法' : question.operation === 'multiply' ? '乘法' : '除法'}练习</div>
+      <div class="question-badge">${question.operation === 'add' ? '加法' : question.operation === 'subtract' ? '减法' : question.operation === 'multiply' ? '乘法' : '除法'}闯关</div>
       <div class="question-text">${question.left} <span>${question.symbol}</span> ${question.right}</div>
       <div class="answer-display">${state.answerInput || '？'}</div>
-      <div class="question-tip">看清题目，再按数字按钮输入答案哦～</div>
+      <div class="question-tip">看清题目，按数字键把答案填进去吧！</div>
     </div>
   `;
 
@@ -358,7 +358,7 @@ function createKeypad(hasAnswer: boolean): HTMLElement {
   const submit = document.createElement('button');
   submit.type = 'button';
   submit.className = 'submit-btn';
-  submit.textContent = hasAnswer ? '✅ 提交答案' : '先输入答案';
+  submit.textContent = hasAnswer ? '✅ 提交答案' : '先输入数字';
   submit.disabled = !hasAnswer;
   submit.addEventListener('click', () => runtime.submitCurrentAnswer());
   keypad.appendChild(submit);
@@ -372,7 +372,7 @@ function renderFeedback(state: SessionState): HTMLElement {
   const question = state.question;
   const feedback = state.feedback;
   if (!question || !feedback) {
-    panel.textContent = '反馈准备中…';
+    panel.textContent = '马上公布结果…';
     return panel;
   }
 
@@ -390,7 +390,7 @@ function renderFeedback(state: SessionState): HTMLElement {
         <span>已答对：${state.progress.correctCount}/${state.progress.total}</span>
       </div>
       ${feedback.streakReward ? `<div class="streak-bonus">${feedback.streakReward}</div>` : ''}
-      <button class="next-btn" type="button">${state.questionNumber >= state.progress.total ? '🏁 查看领奖页' : '➡️ 下一题'}</button>
+      <button class="next-btn" type="button">${state.questionNumber >= state.progress.total ? '🏁 查看成绩' : '➡️ 下一题'}</button>
     </div>
   `;
 
@@ -403,7 +403,7 @@ function renderResult(state: SessionState): HTMLElement {
   panel.className = 'panel result-panel';
   const result = state.results;
   if (!result) {
-    panel.textContent = '结算中…';
+    panel.textContent = '正在统计成绩…';
     return panel;
   }
 
@@ -421,10 +421,10 @@ function renderResult(state: SessionState): HTMLElement {
         <div class="result-item"><span>最佳连对</span><strong>${result.bestStreak}</strong></div>
         <div class="result-item"><span>奖励金币</span><strong>${result.coins}</strong></div>
       </div>
-      <div class="result-message">今天已经很棒了，想不想马上再来一局，把奖杯点亮得更闪？</div>
+      <div class="result-message">今天表现很棒，马上再来一局，看看能不能拿到更亮的奖杯！</div>
       <div class="result-actions">
         <button class="start-btn play-again" type="button">🔁 再来一局</button>
-        <button class="secondary-btn go-home" type="button">🏠 回到首页</button>
+        <button class="secondary-btn go-home" type="button">🏠 返回首页</button>
       </div>
     </div>
   `;
