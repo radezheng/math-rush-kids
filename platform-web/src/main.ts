@@ -318,7 +318,6 @@ function renderQuestion(state: SessionState): HTMLElement {
       <div class="question-badge">${question.operation === 'add' ? '加法' : question.operation === 'subtract' ? '减法' : question.operation === 'multiply' ? '乘法' : '除法'}闯关</div>
       <div class="question-text">${question.left} <span>${question.symbol}</span> ${question.right}</div>
       <div class="answer-display">${state.answerInput || '？'}</div>
-      <div class="question-tip">看清题目，按数字键把答案填进去吧！</div>
     </div>
   `;
 
