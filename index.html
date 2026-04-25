@@ -99,6 +99,7 @@
         align-items: flex-start;
         gap: 12px;
         padding: 8px 4px;
+        flex-wrap: wrap;
       }
 
       .eyebrow {
@@ -123,6 +124,7 @@
       .hero-stats {
         display: grid;
         gap: 10px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .hero-stat {
@@ -155,6 +157,7 @@
         align-items: center;
         gap: 16px;
         margin-bottom: 14px;
+        flex-wrap: wrap;
       }
 
       .panel-banner h2,
@@ -282,6 +285,10 @@
         margin: 18px 0;
       }
 
+      .quick-note {
+        font-size: 14px;
+      }
+
       .start-btn,
       .next-btn,
       .submit-btn {
@@ -321,6 +328,49 @@
         padding: 16px;
         border-radius: 24px;
         background: linear-gradient(180deg, rgba(74, 135, 255, 0.08), rgba(255, 255, 255, 0.74));
+      }
+
+      .settings-toggle {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 0;
+        background: transparent;
+        text-align: left;
+      }
+
+      .settings-title {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .settings-toggle strong {
+        display: block;
+        font-size: 16px;
+        line-height: 1.45;
+        color: var(--text);
+      }
+
+      .settings-toggle-icon {
+        flex: 0 0 auto;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.82);
+        color: var(--purple);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .settings-body {
+        display: grid;
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .settings-card.is-collapsed .settings-body {
+        display: none;
       }
 
       .setting-item {
@@ -519,6 +569,31 @@
 
         .hero-bar {
           flex-direction: column;
+          gap: 10px;
+          padding: 4px 2px;
+        }
+
+        .app-shell {
+          gap: 14px;
+        }
+
+        .hero-bar h1 {
+          font-size: 29px;
+        }
+
+        .hero-stats {
+          width: 100%;
+        }
+
+        .hero-stat {
+          min-width: 0;
+          padding: 10px 12px;
+          text-align: left;
+        }
+
+        .panel {
+          padding: 16px;
+          border-radius: 24px;
         }
 
         .hero-stats,
@@ -526,7 +601,6 @@
         .progress-card,
         .feedback-strip,
         .result-actions,
-        .op-grid,
         .difficulty-row,
         .setting-grid,
         .result-grid {
@@ -536,11 +610,157 @@
 
         .panel-banner {
           align-items: flex-start;
+          gap: 12px;
+        }
+
+        .panel-banner h2,
+        .feedback-card h2,
+        .award-card h2 {
+          font-size: 22px;
         }
 
         .mascot-card {
           width: 100%;
           min-width: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          padding: 12px 14px;
+          text-align: left;
+        }
+
+        .mascot {
+          margin-bottom: 0;
+          font-size: 34px;
+        }
+
+        .op-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .op-card {
+          min-height: 94px;
+          padding: 12px 10px;
+          gap: 6px;
+          border-radius: 18px;
+        }
+
+        .op-card strong {
+          font-size: 16px;
+        }
+
+        .op-card span:last-child {
+          font-size: 12px;
+          line-height: 1.35;
+        }
+
+        .op-icon {
+          width: 36px;
+          height: 36px;
+          border-radius: 12px;
+          font-size: 22px;
+        }
+
+        .primary-actions {
+          gap: 10px;
+          margin: 16px 0;
+        }
+
+        .start-btn,
+        .next-btn,
+        .submit-btn {
+          padding: 15px 16px;
+          font-size: 18px;
+        }
+
+        .start-btn small {
+          font-size: 12px;
+          line-height: 1.4;
+        }
+
+        .settings-card {
+          padding: 14px;
+          border-radius: 20px;
+        }
+
+        .settings-toggle {
+          align-items: flex-start;
+        }
+
+        .settings-toggle strong {
+          font-size: 14px;
+        }
+
+        .settings-toggle-icon {
+          padding: 7px 10px;
+          font-size: 12px;
+        }
+
+        .setting-item {
+          padding: 12px;
+          gap: 8px;
+        }
+
+        .difficulty-pill {
+          min-height: 0;
+          padding: 14px 12px;
+        }
+
+        .progress-card,
+        .feedback-strip {
+          gap: 10px;
+        }
+
+        .question-card {
+          padding: 18px 14px;
+        }
+
+        .keypad {
+          gap: 10px;
+        }
+
+        .key-btn {
+          min-height: 66px;
+          font-size: 24px;
+        }
+      }
+
+      @media (max-width: 360px) {
+        body {
+          padding-inline: 8px;
+        }
+
+        .hero-bar h1 {
+          font-size: 27px;
+        }
+
+        .panel {
+          padding: 14px;
+        }
+
+        .op-grid {
+          gap: 8px;
+        }
+
+        .op-card {
+          min-height: 88px;
+          padding: 10px 9px;
+        }
+
+        .op-card strong {
+          font-size: 15px;
+        }
+
+        .op-card span:last-child {
+          font-size: 11px;
+        }
+
+        .op-icon {
+          width: 32px;
+          height: 32px;
+          font-size: 20px;
         }
       }
     </style>

@@ -123,6 +123,26 @@ const DIFFICULTY_META: Array<{ id: Difficulty; label: string; hint: string }> = 
   { id: 'challenge', label: '挑战', hint: '数字更大更带劲' },
 ];
 
+let isSettingsExpanded = false;
+
+function getDifficultyLabel(difficulty: Difficulty): string {
+  return DIFFICULTY_META.find((item) => item.id === difficulty)?.label ?? '普通';
+}
+
+function formatOperationsSummary(operations: Operation[]): string {
+  if (operations.length === 0) return '加减';
+  const labels = operations.map((operation) => OPERATION_META.find((item) => item.id === operation)?.label ?? operation);
+  return labels.length <= 2 ? labels.join(' + ') : `${labels.slice(0, 2).join(' + ')}等${labels.length}种`;
+}
+
+function formatQuickStartSummary(state: SessionState): string {
+  return `${state.settings.questionCount} 道 · ${state.settings.maxNumber} 以内 · ${getDifficultyLabel(state.settings.difficulty)} · ${formatOperationsSummary(state.settings.operations)}`;
+}
+
+function formatSettingsSummary(state: SessionState): string {
+  return `${state.settings.questionCount} 题 / ${state.settings.maxNumber} 以内 / ${getDifficultyLabel(state.settings.difficulty)} / ${formatOperationsSummary(state.settings.operations)}`;
+}
+
 runtime.subscribe(render);
 
 function render(state: SessionState): void {
@@ -174,6 +194,7 @@ function renderHome(state: SessionState): HTMLElement {
   panel.className = 'panel home-panel';
 
   const selectedOps = state.settings.operations;
+  const quickStartSummary = formatQuickStartSummary(state);
   panel.innerHTML = `
     <div class="panel-banner">
       <div>
@@ -210,33 +231,46 @@ function renderHome(state: SessionState): HTMLElement {
   actionRow.innerHTML = `
     <button class="start-btn" type="button">
       🚀 快速开始
-      <small>10 道 · 20 以内 · 普通难度</small>
+      <small>${quickStartSummary}</small>
     </button>
-    <div class="quick-note">没选运算也能开玩，系统会自动补上基础练习。</div>
+    <div class="quick-note">没选运算也能开玩，系统会自动补上基础练习；开始时会直接按当前设置出题。</div>
   `;
-  actionRow.querySelector<HTMLButtonElement>('.start-btn')?.addEventListener('click', () => runtime.quickStart());
+  actionRow.querySelector<HTMLButtonElement>('.start-btn')?.addEventListener('click', () => runtime.startGame(state.settings));
   panel.appendChild(actionRow);
 
   const settingsCard = document.createElement('div');
-  settingsCard.className = 'settings-card';
+  settingsCard.className = `settings-card ${isSettingsExpanded ? 'is-expanded' : 'is-collapsed'}`;
   settingsCard.innerHTML = `
-    <div class="section-title">自定义设置</div>
-    <div class="setting-grid">
-      <label class="setting-item">
-        <span>题数</span>
-        <input class="slider" type="range" min="5" max="30" step="5" value="${state.settings.questionCount}" />
-        <strong>${state.settings.questionCount} 题</strong>
-      </label>
-      <label class="setting-item">
-        <span>数值范围（多少以内）</span>
-        <input class="slider max-slider" type="range" min="10" max="100" step="5" value="${state.settings.maxNumber}" />
-        <strong>${state.settings.maxNumber} 以内</strong>
-      </label>
+    <button class="settings-toggle" type="button" aria-expanded="${isSettingsExpanded ? 'true' : 'false'}">
+      <span>
+        <span class="section-title settings-title">自定义设置</span>
+        <strong>${formatSettingsSummary(state)}</strong>
+      </span>
+      <span class="settings-toggle-icon">${isSettingsExpanded ? '收起' : '展开'}</span>
+    </button>
+    <div class="settings-body">
+      <div class="setting-grid">
+        <label class="setting-item">
+          <span>题数</span>
+          <input class="slider" type="range" min="5" max="30" step="5" value="${state.settings.questionCount}" />
+          <strong>${state.settings.questionCount} 题</strong>
+        </label>
+        <label class="setting-item">
+          <span>数值范围（多少以内）</span>
+          <input class="slider max-slider" type="range" min="10" max="100" step="5" value="${state.settings.maxNumber}" />
+          <strong>${state.settings.maxNumber} 以内</strong>
+        </label>
+      </div>
+      <div class="section-title">难度</div>
     </div>
-    <div class="section-title">难度</div>
   `;
 
-  const sliders = settingsCard.querySelectorAll<HTMLInputElement>('input.slider');
+  settingsCard.querySelector<HTMLButtonElement>('.settings-toggle')?.addEventListener('click', () => {
+    isSettingsExpanded = !isSettingsExpanded;
+    render(runtime.getState());
+  });
+
+  const sliders = settingsCard.querySelectorAll<HTMLInputElement>('.settings-body input.slider');
   sliders[0]?.addEventListener('input', (event) => {
     runtime.updateSettings({ questionCount: Number((event.target as HTMLInputElement).value) });
   });
@@ -254,14 +288,7 @@ function renderHome(state: SessionState): HTMLElement {
     button.addEventListener('click', () => runtime.setDifficulty(difficulty.id));
     difficultyRow.appendChild(button);
   }
-  settingsCard.appendChild(difficultyRow);
-
-  const customStart = document.createElement('button');
-  customStart.type = 'button';
-  customStart.className = 'secondary-btn';
-  customStart.innerHTML = '🎯 按当前设置开始';
-  customStart.addEventListener('click', () => runtime.startGame(state.settings));
-  settingsCard.appendChild(customStart);
+  settingsCard.querySelector('.settings-body')?.appendChild(difficultyRow);
 
   panel.appendChild(settingsCard);
 
