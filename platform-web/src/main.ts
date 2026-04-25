@@ -207,10 +207,6 @@ function renderHome(state: SessionState): HTMLElement {
             <span class="stat-label">最高正确率</span>
             <strong>${bestAccuracy}</strong>
           </div>
-          <div class="hero-stat compact-stat compact-stat-summary">
-            <span class="stat-label">这次要练</span>
-            <strong>${quickStartSummary}</strong>
-          </div>
         </div>
       </div>
     </div>
@@ -317,7 +313,6 @@ function renderQuestion(state: SessionState): HTMLElement {
         <div class="section-title">第 ${state.questionNumber} / ${state.progress.total} 题</div>
         <div class="tiny-note">答对 ${state.progress.correctCount} 题 · 当前连对 ${state.progress.streak} 题</div>
       </div>
-      <button class="ghost-btn" type="button">返回首页</button>
     </div>
     <div class="question-card">
       <div class="question-badge">${question.operation === 'add' ? '加法' : question.operation === 'subtract' ? '减法' : question.operation === 'multiply' ? '乘法' : '除法'}闯关</div>
@@ -327,8 +322,13 @@ function renderQuestion(state: SessionState): HTMLElement {
     </div>
   `;
 
-  panel.querySelector<HTMLButtonElement>('.ghost-btn')?.addEventListener('click', () => runtime.goHome());
   panel.appendChild(createKeypad(state.answerInput.length > 0));
+  const goHomeButton = document.createElement('button');
+  goHomeButton.type = 'button';
+  goHomeButton.className = 'ghost-btn question-home-btn';
+  goHomeButton.textContent = '返回首页';
+  goHomeButton.addEventListener('click', () => runtime.goHome());
+  panel.appendChild(goHomeButton);
   return panel;
 }
 
