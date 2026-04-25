@@ -111,10 +111,10 @@ window.addEventListener('keydown', (event) => {
 });
 
 const OPERATION_META: Array<{ id: Operation; label: string; icon: string; hint: string }> = [
-  { id: 'add', label: '加法', icon: '+', hint: '从简单开始冲' },
-  { id: 'subtract', label: '减法', icon: '−', hint: '越算越稳当' },
-  { id: 'multiply', label: '乘法', icon: '×', hint: '挑战乘法节奏' },
-  { id: 'divide', label: '除法', icon: '÷', hint: '整整齐齐来闯关' },
+  { id: 'add', label: '加法', icon: '+', hint: '先练基础加法' },
+  { id: 'subtract', label: '减法', icon: '−', hint: '一步步练熟' },
+  { id: 'multiply', label: '乘法', icon: '×', hint: '练习乘法口诀' },
+  { id: 'divide', label: '除法', icon: '÷', hint: '一起练除法' },
 ];
 
 const DIFFICULTY_META: Array<{ id: Difficulty; label: string; hint: string }> = [
@@ -167,7 +167,7 @@ function render(state: SessionState): void {
 
   const footer = document.createElement('footer');
   footer.className = 'footer-note';
-  footer.textContent = '选好玩法就开冲，看看这次能拿几颗星！';
+  footer.textContent = '准备好了就开始，看看这次能得几颗星。';
   shell.appendChild(footer);
 
   app.appendChild(shell);
@@ -200,15 +200,15 @@ function renderHome(state: SessionState): HTMLElement {
         </div>
         <div class="hero-stats compact-stats">
           <div class="hero-stat compact-stat">
-            <span class="stat-label">历史星级</span>
+            <span class="stat-label">最好成绩</span>
             <strong>${bestStars}</strong>
           </div>
           <div class="hero-stat compact-stat">
-            <span class="stat-label">最佳命中</span>
+            <span class="stat-label">最高正确率</span>
             <strong>${bestAccuracy}</strong>
           </div>
           <div class="hero-stat compact-stat compact-stat-summary">
-            <span class="stat-label">这次挑战</span>
+            <span class="stat-label">本次练习</span>
             <strong>${quickStartSummary}</strong>
           </div>
         </div>
@@ -241,7 +241,6 @@ function renderHome(state: SessionState): HTMLElement {
       🚀 快速开始
       <small>${quickStartSummary}</small>
     </button>
-    <div class="quick-note">点一下就出发，题目会按你现在选好的玩法和难度来准备。</div>
   `;
   actionRow.querySelector<HTMLButtonElement>('.start-btn')?.addEventListener('click', () => runtime.startGame(state.settings));
   panel.appendChild(actionRow);
