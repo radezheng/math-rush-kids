@@ -310,7 +310,7 @@ function renderQuestion(state: SessionState): HTMLElement {
   panel.innerHTML = `
     <div class="progress-card question-progress-card">
       <div class="question-progress-index">第${state.questionNumber}/${state.progress.total}题</div>
-      <div class="question-progress-meta">✓${state.progress.correctCount} 连${state.progress.streak}</div>
+      <div class="question-progress-meta">对${state.progress.correctCount} · 连${state.progress.streak}</div>
     </div>
     <div class="question-card">
       <div class="question-badge">${question.operation === 'add' ? '加法' : question.operation === 'subtract' ? '减法' : question.operation === 'multiply' ? '乘法' : '除法'}闯关</div>
