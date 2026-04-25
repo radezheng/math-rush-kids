@@ -1,0 +1,15 @@
+{
+  "name": "math-rush-kids",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "test": "rm -rf .tmp-test && tsc --outDir .tmp-test --module ESNext --target ES2020 --moduleResolution bundler game-core/src/gameplay/mathRush.ts game-core/src/gameplay/mathRush.test.ts && node --experimental-specifier-resolution=node .tmp-test/mathRush.test.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^7.1.7"
+  }
+}
