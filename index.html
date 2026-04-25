@@ -86,39 +86,23 @@
         background: rgba(74, 135, 255, 0.26);
       }
 
-      .hero-bar,
       .panel,
       .footer-note {
         position: relative;
         z-index: 1;
       }
 
-      .hero-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 8px 4px;
-        flex-wrap: wrap;
-      }
-
       .eyebrow {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 6px 12px;
+        padding: 5px 10px;
         border-radius: 999px;
         background: rgba(255, 255, 255, 0.7);
         color: var(--purple);
         font-size: 12px;
         font-weight: 800;
         letter-spacing: 0.04em;
-      }
-
-      .hero-bar h1 {
-        margin: 10px 0 0;
-        font-size: 34px;
-        line-height: 1.05;
       }
 
       .hero-stats {
@@ -128,12 +112,12 @@
       }
 
       .hero-stat {
-        min-width: 110px;
+        min-width: 0;
         padding: 12px 14px;
         border-radius: 20px;
         background: rgba(255, 255, 255, 0.7);
-        box-shadow: var(--shadow);
-        text-align: right;
+        box-shadow: inset 0 0 0 1px rgba(124, 77, 255, 0.08);
+        text-align: left;
       }
 
       .stat-label {
@@ -151,20 +135,29 @@
         backdrop-filter: blur(10px);
       }
 
+      .home-panel {
+        padding: 18px;
+      }
+
       .panel-banner {
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 16px;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
         flex-wrap: wrap;
       }
 
+      .home-panel h1,
       .panel-banner h2,
       .feedback-card h2,
       .award-card h2 {
-        margin: 8px 0;
+        margin: 6px 0;
         font-size: 26px;
+      }
+
+      .home-panel h1 {
+        line-height: 1.08;
       }
 
       .panel-banner p,
@@ -177,6 +170,13 @@
       .result-message {
         color: var(--muted);
         line-height: 1.5;
+      }
+
+      .section-subtitle {
+        margin: -4px 0 14px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.45;
       }
 
       .banner-badge,
@@ -204,6 +204,69 @@
       .mascot {
         font-size: 42px;
         margin-bottom: 8px;
+      }
+
+      .compact-home-banner {
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+
+      .home-hero-copy {
+        display: grid;
+        gap: 12px;
+        width: 100%;
+      }
+
+      .home-hero-topline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .home-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .compact-home-banner p {
+        margin: 0;
+      }
+
+      .compact-mascot-card {
+        width: 96px;
+        min-width: 96px;
+        padding: 12px 10px;
+        border-radius: 20px;
+        font-size: 14px;
+      }
+
+      .compact-mascot-card .mascot {
+        margin-bottom: 4px;
+        font-size: 34px;
+      }
+
+      .compact-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .compact-stat {
+        padding: 10px 12px;
+        border-radius: 18px;
+      }
+
+      .compact-stat strong {
+        display: block;
+        font-size: 15px;
+        line-height: 1.35;
+      }
+
+      .compact-stat-summary {
+        grid-column: span 3;
       }
 
       .section-title {
@@ -282,7 +345,7 @@
       }
 
       .primary-actions {
-        margin: 18px 0;
+        margin: 16px 0;
       }
 
       .quick-note {
@@ -567,33 +630,17 @@
           padding: 16px 10px 24px;
         }
 
-        .hero-bar {
-          flex-direction: column;
-          gap: 10px;
-          padding: 4px 2px;
-        }
-
         .app-shell {
-          gap: 14px;
-        }
-
-        .hero-bar h1 {
-          font-size: 29px;
-        }
-
-        .hero-stats {
-          width: 100%;
-        }
-
-        .hero-stat {
-          min-width: 0;
-          padding: 10px 12px;
-          text-align: left;
+          gap: 12px;
         }
 
         .panel {
           padding: 16px;
           border-radius: 24px;
+        }
+
+        .home-panel {
+          padding: 16px;
         }
 
         .hero-stats,
@@ -613,10 +660,27 @@
           gap: 12px;
         }
 
+        .home-panel h1,
         .panel-banner h2,
         .feedback-card h2,
         .award-card h2 {
           font-size: 22px;
+        }
+
+        .home-title-row {
+          align-items: flex-start;
+        }
+
+        .home-hero-topline {
+          gap: 6px;
+        }
+
+        .compact-stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .compact-stat-summary {
+          grid-column: 1 / -1;
         }
 
         .mascot-card {
@@ -628,6 +692,19 @@
           gap: 10px;
           padding: 12px 14px;
           text-align: left;
+        }
+
+        .compact-mascot-card {
+          width: auto;
+          min-width: 92px;
+          justify-content: center;
+          text-align: center;
+          padding: 10px 12px;
+        }
+
+        .compact-mascot-card .mascot {
+          margin-bottom: 0;
+          font-size: 30px;
         }
 
         .mascot {
@@ -732,12 +809,24 @@
           padding-inline: 8px;
         }
 
-        .hero-bar h1 {
-          font-size: 27px;
-        }
-
         .panel {
           padding: 14px;
+        }
+
+        .home-panel h1 {
+          font-size: 21px;
+        }
+
+        .compact-home-banner {
+          gap: 10px;
+        }
+
+        .compact-stat {
+          padding: 9px 10px;
+        }
+
+        .compact-stat strong {
+          font-size: 14px;
         }
 
         .op-grid {

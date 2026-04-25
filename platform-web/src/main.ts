@@ -153,22 +153,6 @@ function render(state: SessionState): void {
   shell.innerHTML = `
     <div class="top-glow top-glow-left"></div>
     <div class="top-glow top-glow-right"></div>
-    <header class="hero-bar">
-      <div>
-        <div class="eyebrow">Math Rush Kids</div>
-        <h1>口算冲冲冲</h1>
-      </div>
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <span class="stat-label">历史星级</span>
-          <strong>${'⭐'.repeat(Math.max(1, state.bestStars || 1))}</strong>
-        </div>
-        <div class="hero-stat">
-          <span class="stat-label">最佳命中</span>
-          <strong>${Math.round(state.bestAccuracy * 100)}%</strong>
-        </div>
-      </div>
-    </header>
   `;
 
   if (state.screen === 'home') {
@@ -195,19 +179,43 @@ function renderHome(state: SessionState): HTMLElement {
 
   const selectedOps = state.settings.operations;
   const quickStartSummary = formatQuickStartSummary(state);
+  const bestStars = '⭐'.repeat(Math.max(1, state.bestStars || 1));
+  const bestAccuracy = `${Math.round(state.bestAccuracy * 100)}%`;
   panel.innerHTML = `
-    <div class="panel-banner">
-      <div>
-        <div class="banner-badge">Milestone 1 浏览器可玩版</div>
-        <h2>今天想练哪几种口算？</h2>
-        <p>支持多选，什么都不选时会自动兜底成“加法 + 减法”。</p>
-      </div>
-      <div class="mascot-card">
-        <div class="mascot">🦊</div>
-        <div>小小口算员，出发！</div>
+    <div class="panel-banner compact-home-banner">
+      <div class="home-hero-copy">
+        <div class="home-hero-topline">
+          <div class="eyebrow">Math Rush Kids</div>
+          <div class="banner-badge">Milestone 1 浏览器可玩版</div>
+        </div>
+        <div class="home-title-row">
+          <div>
+            <h1>口算冲冲冲</h1>
+            <p>标题、状态和开始入口都收进同一张主卡里，打开就能直接开练。</p>
+          </div>
+          <div class="mascot-card compact-mascot-card">
+            <div class="mascot">🦊</div>
+            <div>马上出发</div>
+          </div>
+        </div>
+        <div class="hero-stats compact-stats">
+          <div class="hero-stat compact-stat">
+            <span class="stat-label">历史星级</span>
+            <strong>${bestStars}</strong>
+          </div>
+          <div class="hero-stat compact-stat">
+            <span class="stat-label">最佳命中</span>
+            <strong>${bestAccuracy}</strong>
+          </div>
+          <div class="hero-stat compact-stat compact-stat-summary">
+            <span class="stat-label">本次将开始</span>
+            <strong>${quickStartSummary}</strong>
+          </div>
+        </div>
       </div>
     </div>
     <div class="section-title">选择运算</div>
+    <div class="section-subtitle">支持多选，什么都不选时会自动兜底成“加法 + 减法”。</div>
   `;
 
   const opGrid = document.createElement('div');
