@@ -111,10 +111,10 @@ window.addEventListener('keydown', (event) => {
 });
 
 const OPERATION_META: Array<{ id: Operation; label: string; icon: string; hint: string }> = [
-  { id: 'add', label: '加法', icon: '+', hint: '先练基础加法' },
-  { id: 'subtract', label: '减法', icon: '−', hint: '一步步练熟' },
-  { id: 'multiply', label: '乘法', icon: '×', hint: '练习乘法口诀' },
-  { id: 'divide', label: '除法', icon: '÷', hint: '一起练除法' },
+  { id: 'add', label: '加法', icon: '+', hint: '从加法热热身' },
+  { id: 'subtract', label: '减法', icon: '−', hint: '把减法练熟' },
+  { id: 'multiply', label: '乘法', icon: '×', hint: '来背背乘法口诀' },
+  { id: 'divide', label: '除法', icon: '÷', hint: '学会平均分一分' },
 ];
 
 const DIFFICULTY_META: Array<{ id: Difficulty; label: string; hint: string }> = [
@@ -191,7 +191,7 @@ function renderHome(state: SessionState): HTMLElement {
         <div class="home-title-row">
           <div>
             <h1>口算冲冲冲</h1>
-            <p>选好玩法，马上开始一局快乐口算挑战。</p>
+            <p>选好要练的内容，马上开始。</p>
           </div>
           <div class="mascot-card compact-mascot-card">
             <div class="mascot">🦊</div>
@@ -200,7 +200,7 @@ function renderHome(state: SessionState): HTMLElement {
         </div>
         <div class="hero-stats compact-stats">
           <div class="hero-stat compact-stat">
-            <span class="stat-label">最好成绩</span>
+            <span class="stat-label">最高星级</span>
             <strong>${bestStars}</strong>
           </div>
           <div class="hero-stat compact-stat">
@@ -208,7 +208,7 @@ function renderHome(state: SessionState): HTMLElement {
             <strong>${bestAccuracy}</strong>
           </div>
           <div class="hero-stat compact-stat compact-stat-summary">
-            <span class="stat-label">本次练习</span>
+            <span class="stat-label">这次要练</span>
             <strong>${quickStartSummary}</strong>
           </div>
         </div>
@@ -250,7 +250,7 @@ function renderHome(state: SessionState): HTMLElement {
   settingsCard.innerHTML = `
     <button class="settings-toggle" type="button" aria-expanded="${isSettingsExpanded ? 'true' : 'false'}">
       <span>
-        <span class="section-title settings-title">挑战设置</span>
+        <span class="section-title settings-title">练习设置</span>
         <strong>${formatSettingsSummary(state)}</strong>
       </span>
       <span class="settings-toggle-icon">${isSettingsExpanded ? '收起' : '展开'}</span>
