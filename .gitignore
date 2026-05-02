@@ -3,3 +3,5 @@ dist/
 .tmp-test/
 *.tsbuildinfo
 .DS_Store
+
+.env
