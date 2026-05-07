@@ -110,53 +110,85 @@ export function drawWeChatScreen(ctx: CanvasRenderingContext2D, state: SessionSt
 }
 
 function addHomeTargets(targets: HitTarget[], state: SessionState, width: number, height: number, topInset: number, settingsExpanded: boolean): void {
-  const horizontalMargin = 28;
+  const sections = measureHomeSections(width, height, topInset, settingsExpanded);
   const gap = 10;
-  const contentWidth = width - horizontalMargin * 2;
-  const heroY = topInset + 62;
-  const settingsY = heroY + 70;
-  const settingsHeight = settingsExpanded ? 196 : 60;
 
-  targets.push({ x: horizontalMargin, y: settingsY, width: contentWidth, height: 60, label: '练习设置', action: { type: 'toggle-settings' } });
+  targets.push({ ...sections.stats, label: '最高记录 / 排行榜', action: { type: 'home' }, disabled: true });
+  targets.push({ ...sections.settingsToggle, label: '练习设置', action: { type: 'toggle-settings' } });
 
   if (settingsExpanded) {
-    const rowTop = settingsY + 68;
-    addStepperTargets(targets, '题数', 'adjust-question-count', state.settings.questionCount, QUESTION_COUNT_MIN, QUESTION_COUNT_MAX, horizontalMargin + 124, rowTop, contentWidth - 124);
-    addStepperTargets(targets, '数字范围', 'adjust-max-number', state.settings.maxNumber, MAX_NUMBER_MIN, MAX_NUMBER_MAX, horizontalMargin + 124, rowTop + 52, contentWidth - 124);
+    const rowTop = sections.settingsPanel.y + 64;
+    addStepperTargets(targets, '题数', 'adjust-question-count', state.settings.questionCount, QUESTION_COUNT_MIN, QUESTION_COUNT_MAX, sections.settingsPanel.x + 124, rowTop, sections.settingsPanel.width - 124);
+    addStepperTargets(targets, '数字范围', 'adjust-max-number', state.settings.maxNumber, MAX_NUMBER_MIN, MAX_NUMBER_MAX, sections.settingsPanel.x + 124, rowTop + 44, sections.settingsPanel.width - 124);
 
-    const pillWidth = (contentWidth - gap * 2) / 3;
+    const pillWidth = (sections.settingsPanel.width - gap * 2) / 3;
     DIFFICULTY_META.forEach((difficulty, index) => {
       targets.push({
-        x: horizontalMargin + index * (pillWidth + gap),
-        y: settingsY + 152,
+        x: sections.settingsPanel.x + index * (pillWidth + gap),
+        y: sections.settingsPanel.y + 148,
         width: pillWidth,
-        height: 38,
+        height: 32,
         label: difficulty.label,
         action: { type: 'set-difficulty', difficulty: difficulty.id },
       });
     });
   }
 
-  const cardWidth = (contentWidth - gap) / 2;
-  const desiredOperationTop = settingsY + settingsHeight + 28;
-  const fixedStartY = height - 76;
-  const maxOperationTop = fixedStartY - 116;
-  const operationTop = Math.max(topInset + 242, Math.min(desiredOperationTop, maxOperationTop));
+  const cardWidth = (sections.operations.width - gap) / 2;
   OPERATION_META.forEach((operation, index) => {
     const col = index % 2;
     const row = Math.floor(index / 2);
     targets.push({
-      x: horizontalMargin + col * (cardWidth + gap),
-      y: operationTop + row * 58,
+      x: sections.operations.x + col * (cardWidth + gap),
+      y: sections.operations.y + row * 56,
       width: cardWidth,
-      height: 50,
+      height: 48,
       label: operation.label,
       action: { type: 'toggle-operation', operation: operation.id },
     });
   });
 
-  const startY = Math.min(height - 76, operationTop + 2 * 58 + 16);
-  targets.push({ x: horizontalMargin, y: startY, width: contentWidth, height: 56, label: '快速开始', action: { type: 'start' }, disabled: state.settings.operations.length === 0 });
+  targets.push({ ...sections.start, label: '快速开始', action: { type: 'start' }, disabled: state.settings.operations.length === 0 });
+  targets.push({ ...sections.ad, label: '广告位预留', action: { type: 'home' }, disabled: true });
+}
+
+interface HomeSections {
+  hero: Rect;
+  stats: Rect;
+  settingsPanel: Rect;
+  settingsToggle: Rect;
+  operations: Rect;
+  start: Rect;
+  ad: Rect;
+}
+
+function measureHomeSections(width: number, height: number, topInset: number, settingsExpanded: boolean): HomeSections {
+  const margin = 28;
+  const contentWidth = width - margin * 2;
+  const compact = height <= 700;
+  const gap = compact ? 8 : 10;
+  const heroHeight = compact ? 48 : 60;
+  const statsHeight = compact ? 48 : 56;
+  const settingsHeight = settingsExpanded ? (compact ? 188 : 196) : 58;
+  const operationsHeight = 104;
+  const startHeight = 52;
+  const adHeight = 44;
+
+  let cursor = topInset + (compact ? 46 : 62);
+  const hero = { x: margin - 6, y: cursor, width: contentWidth + 12, height: heroHeight };
+  cursor += heroHeight + gap;
+  const stats = { x: margin, y: cursor, width: contentWidth, height: statsHeight };
+  cursor += statsHeight + gap;
+  const settingsPanel = { x: margin, y: cursor, width: contentWidth, height: settingsHeight };
+  const settingsToggle = { x: margin, y: cursor, width: contentWidth, height: 58 };
+  cursor += settingsHeight + gap + 18;
+  const operations = { x: margin, y: cursor, width: contentWidth, height: operationsHeight };
+  cursor += operationsHeight + gap;
+  const start = { x: margin, y: cursor, width: contentWidth, height: startHeight };
+  cursor += startHeight + gap;
+  const ad = { x: margin, y: cursor, width: contentWidth, height: adHeight };
+
+  return { hero, stats, settingsPanel, settingsToggle, operations, start, ad };
 }
 
 function addStepperTargets(
@@ -223,26 +255,31 @@ function drawHeader(ctx: CanvasRenderingContext2D, state: SessionState, layout: 
 }
 
 function drawHome(ctx: CanvasRenderingContext2D, state: SessionState, layout: WeChatLayout): void {
-  const heroY = layout.topInset + 62;
-  panel(ctx, 22, heroY, layout.width - 44, 60, '#ffffffcc');
-  text(ctx, '选择运算，马上开始练习', 42, heroY + 24, 19, '#26304f', 'bold');
-  text(ctx, `${state.settings.questionCount} 题 · ${state.settings.maxNumber} 以内 · ${difficultyLabel(state.settings.difficulty)} · ${formatOperationsSummary(state.settings.operations)}`, 42, heroY + 47, 13, '#65708f');
+  const sections = measureHomeSections(layout.width, layout.height, layout.topInset, layout.settingsExpanded);
+  panel(ctx, sections.hero.x, sections.hero.y, sections.hero.width, sections.hero.height, '#ffffffcc');
+  text(ctx, '选择运算，马上开始练习', sections.hero.x + 20, sections.hero.y + 18, 17, '#26304f', 'bold');
+  text(ctx, `${state.settings.questionCount} 题 · ${state.settings.maxNumber} 以内 · ${difficultyLabel(state.settings.difficulty)} · ${formatOperationsSummary(state.settings.operations)}`, sections.hero.x + 20, sections.hero.y + 38, 12, '#65708f');
+
+  panel(ctx, sections.stats.x, sections.stats.y, sections.stats.width, sections.stats.height, '#ffffffd9');
+  text(ctx, '最高记录', sections.stats.x + 16, sections.stats.y + 18, 14, '#26304f', 'bold');
+  text(ctx, `${state.bestStars || 0} 星 · ${Math.round(state.bestAccuracy * 100)}%`, sections.stats.x + 16, sections.stats.y + 36, 13, '#65708f');
+  text(ctx, '排行榜', sections.stats.x + sections.stats.width - 16, sections.stats.y + 18, 14, '#26304f', 'bold', 'right');
+  text(ctx, '即将接入', sections.stats.x + sections.stats.width - 16, sections.stats.y + 36, 13, '#9aa3bd', 'normal', 'right');
 
   const settingsToggle = layout.targets.find((item) => item.action.type === 'toggle-settings');
   if (settingsToggle) {
-    const settingsHeight = layout.settingsExpanded ? 196 : 60;
-    panel(ctx, settingsToggle.x - 4, settingsToggle.y - 4, settingsToggle.width + 8, settingsHeight + 8, '#ffffffd9');
+    panel(ctx, sections.settingsPanel.x - 4, sections.settingsPanel.y - 4, sections.settingsPanel.width + 8, sections.settingsPanel.height + 8, '#ffffffd9');
     text(ctx, '练习设置', settingsToggle.x + 16, settingsToggle.y + 20, 15, '#26304f', 'bold');
     text(ctx, formatSettingsSummary(state), settingsToggle.x + 16, settingsToggle.y + 43, 13, '#65708f');
     text(ctx, layout.settingsExpanded ? '收起' : '展开', settingsToggle.x + settingsToggle.width - 18, settingsToggle.y + 30, 14, '#5b7cfa', 'bold', 'right');
   }
 
   if (layout.settingsExpanded && settingsToggle) {
-    text(ctx, '题数', settingsToggle.x + 16, settingsToggle.y + 88, 14, '#26304f', 'bold');
-    text(ctx, `${state.settings.questionCount} 题`, layout.width / 2, settingsToggle.y + 88, 16, '#26304f', 'bold', 'center');
-    text(ctx, '数字范围', settingsToggle.x + 16, settingsToggle.y + 140, 14, '#26304f', 'bold');
-    text(ctx, `${state.settings.maxNumber} 以内`, layout.width / 2, settingsToggle.y + 140, 16, '#26304f', 'bold', 'center');
-    text(ctx, '难度', settingsToggle.x + 16, settingsToggle.y + 174, 14, '#26304f', 'bold');
+    text(ctx, '题数', settingsToggle.x + 16, settingsToggle.y + 84, 14, '#26304f', 'bold');
+    text(ctx, `${state.settings.questionCount} 题`, layout.width / 2, settingsToggle.y + 84, 16, '#26304f', 'bold', 'center');
+    text(ctx, '数字范围', settingsToggle.x + 16, settingsToggle.y + 134, 14, '#26304f', 'bold');
+    text(ctx, `${state.settings.maxNumber} 以内`, layout.width / 2, settingsToggle.y + 134, 16, '#26304f', 'bold', 'center');
+    text(ctx, '难度', settingsToggle.x + 16, settingsToggle.y + 164, 14, '#26304f', 'bold');
 
     for (const target of layout.targets.filter((item) => item.action.type === 'adjust-question-count' || item.action.type === 'adjust-max-number')) {
       button(ctx, target, target.disabled ? '#e0e5f2' : '#ffffffee', target.disabled ? '#a8b0c8' : '#26304f');
@@ -272,8 +309,11 @@ function drawHome(ctx: CanvasRenderingContext2D, state: SessionState, layout: We
   const start = layout.targets.find((item) => item.action.type === 'start');
   if (start) {
     button(ctx, start, start.disabled ? '#b8c0d8' : '#13b981', '#ffffff');
-    text(ctx, start.disabled ? '至少选择一种运算' : '🚀 快速开始', start.x + start.width / 2, start.y + 34, 19, '#ffffff', 'bold', 'center');
+    text(ctx, start.disabled ? '至少选择一种运算' : '🚀 快速开始', start.x + start.width / 2, start.y + 32, 18, '#ffffff', 'bold', 'center');
   }
+
+  panel(ctx, sections.ad.x, sections.ad.y, sections.ad.width, sections.ad.height, 'rgba(255,255,255,0.45)');
+  text(ctx, '广告位预留', layout.width / 2, sections.ad.y + sections.ad.height / 2, 14, '#9aa3bd', 'bold', 'center');
 }
 
 function drawQuestion(ctx: CanvasRenderingContext2D, state: SessionState, layout: WeChatLayout): void {
