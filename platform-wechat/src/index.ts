@@ -2,20 +2,28 @@ import { GameRuntime } from '@game-core/runtime/GameRuntime';
 import type { Operation } from '@game-core/gameplay/mathRush';
 import { createWeChatLayout, drawWeChatScreen, hitTest, type WeChatAction, type WeChatLayout } from './canvasShell';
 import { createWeChatPlatform } from './platform';
-import { getWx, type WeChatMiniGameWX, type WeChatTouchEvent } from './wxTypes';
+import { getWx, type WeChatMenuButtonRect, type WeChatMiniGameWX, type WeChatSystemInfo, type WeChatTouchEvent } from './wxTypes';
 
 interface ShellOptions {
   wxApi?: WeChatMiniGameWX;
 }
 
+interface CanvasShellSurface {
+  width: number;
+  height: number;
+  topInset: number;
+  getContext(contextId: '2d'): CanvasRenderingContext2D | null;
+}
+
 export class WeChatMiniGameShell {
   private readonly wxApi: WeChatMiniGameWX | undefined;
-  private readonly canvas: { width: number; height: number; getContext(contextId: '2d'): CanvasRenderingContext2D | null };
+  private readonly canvas: CanvasShellSurface;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly platform;
   private readonly runtime;
   private layout: WeChatLayout | null = null;
   private unsubscribe: (() => void) | null = null;
+  private settingsExpanded = false;
 
   constructor(options: ShellOptions = {}) {
     this.wxApi = options.wxApi ?? getWx();
@@ -30,7 +38,10 @@ export class WeChatMiniGameShell {
   start(): void {
     this.unsubscribe?.();
     this.unsubscribe = this.runtime.subscribe((state) => {
-      this.layout = createWeChatLayout(state, this.canvas.width, this.canvas.height);
+      this.layout = createWeChatLayout(state, this.canvas.width, this.canvas.height, {
+        topInset: this.canvas.topInset,
+        settingsExpanded: this.settingsExpanded,
+      });
       drawWeChatScreen(this.ctx, state, this.layout);
     });
     this.bindTouchEvents();
@@ -41,16 +52,18 @@ export class WeChatMiniGameShell {
     this.unsubscribe = null;
   }
 
-  private createCanvas(): { width: number; height: number; getContext(contextId: '2d'): CanvasRenderingContext2D | null } {
+  private createCanvas(): CanvasShellSurface {
     const canvas = this.wxApi?.createCanvas?.();
     if (!canvas) {
       throw new Error('wx.createCanvas is required for the WeChat Mini Game shell.');
     }
 
     const info = this.wxApi?.getSystemInfoSync?.() ?? {};
+    const menuRect = this.readMenuButtonRect();
     const pixelRatio = info.pixelRatio && info.pixelRatio > 0 ? info.pixelRatio : 1;
     const logicalWidth = info.windowWidth ?? 375;
     const logicalHeight = info.windowHeight ?? 667;
+    const topInset = computeTopInset(info, menuRect);
     canvas.width = Math.round(logicalWidth * pixelRatio);
     canvas.height = Math.round(logicalHeight * pixelRatio);
 
@@ -60,8 +73,17 @@ export class WeChatMiniGameShell {
     return {
       width: logicalWidth,
       height: logicalHeight,
+      topInset,
       getContext: () => context,
     };
+  }
+
+  private readMenuButtonRect(): WeChatMenuButtonRect | null {
+    try {
+      return this.wxApi?.getMenuButtonBoundingClientRect?.() ?? null;
+    } catch {
+      return null;
+    }
   }
 
   private bindTouchEvents(): void {
@@ -89,6 +111,15 @@ export class WeChatMiniGameShell {
   private applyAction(action: WeChatAction): void {
     if (action.type === 'toggle-operation') {
       this.runtime.toggleOperation(action.operation);
+    } else if (action.type === 'toggle-settings') {
+      this.settingsExpanded = !this.settingsExpanded;
+      this.redraw();
+    } else if (action.type === 'adjust-question-count') {
+      const current = this.runtime.getState().settings.questionCount;
+      this.runtime.updateSettings({ questionCount: current + action.delta });
+    } else if (action.type === 'adjust-max-number') {
+      const current = this.runtime.getState().settings.maxNumber;
+      this.runtime.updateSettings({ maxNumber: current + action.delta });
     } else if (action.type === 'set-difficulty') {
       this.runtime.setDifficulty(action.difficulty);
     } else if (action.type === 'start') {
@@ -109,6 +140,32 @@ export class WeChatMiniGameShell {
       this.runtime.goHome();
     }
   }
+
+  private redraw(): void {
+    const state = this.runtime.getState();
+    this.layout = createWeChatLayout(state, this.canvas.width, this.canvas.height, {
+      topInset: this.canvas.topInset,
+      settingsExpanded: this.settingsExpanded,
+    });
+    drawWeChatScreen(this.ctx, state, this.layout);
+  }
+}
+
+export function computeTopInset(info: WeChatSystemInfo = {}, menuRect: WeChatMenuButtonRect | null = null): number {
+  if (menuRect && menuRect.bottom > 0) {
+    const menuGap = Math.max(4, menuRect.top - (info.statusBarHeight ?? info.safeArea?.top ?? 0));
+    return Math.ceil(menuRect.bottom + menuGap + 8);
+  }
+
+  if (info.safeArea?.top !== undefined && info.safeArea.top > 0) {
+    return Math.ceil(info.safeArea.top + 24);
+  }
+
+  if (info.statusBarHeight !== undefined && info.statusBarHeight > 0) {
+    return Math.ceil(info.statusBarHeight + 24);
+  }
+
+  return 24;
 }
 
 export function startWeChatMiniGame(options: ShellOptions = {}): WeChatMiniGameShell {

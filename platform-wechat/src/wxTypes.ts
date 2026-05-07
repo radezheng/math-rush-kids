@@ -11,18 +11,30 @@ export interface WeChatTouchEvent {
   changedTouches?: WeChatTouch[];
 }
 
+export interface WeChatSafeArea {
+  top: number;
+  left: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+}
+
+export interface WeChatMenuButtonRect {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
 export interface WeChatSystemInfo {
   windowWidth?: number;
   windowHeight?: number;
   pixelRatio?: number;
-  safeArea?: {
-    top: number;
-    left: number;
-    right: number;
-    bottom: number;
-    width: number;
-    height: number;
-  };
+  statusBarHeight?: number;
+  safeArea?: WeChatSafeArea;
 }
 
 export interface WeChatCanvas {
@@ -34,6 +46,7 @@ export interface WeChatCanvas {
 export interface WeChatMiniGameWX {
   createCanvas?: () => WeChatCanvas;
   getSystemInfoSync?: () => WeChatSystemInfo;
+  getMenuButtonBoundingClientRect?: () => WeChatMenuButtonRect;
   getStorageSync?: (key: string) => unknown;
   setStorageSync?: (key: string, value: unknown) => void;
   onShow?: (callback: () => void) => void;
