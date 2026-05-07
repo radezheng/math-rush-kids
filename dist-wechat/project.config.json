@@ -1,0 +1,16 @@
+{
+  "description": "Math Rush Kids WeChat Mini Game preview project",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": false,
+    "minified": false,
+    "newFeature": true
+  },
+  "compileType": "game",
+  "libVersion": "3.4.0",
+  "appid": "touristappid",
+  "projectname": "math-rush-kids",
+  "miniprogramRoot": "./"
+}

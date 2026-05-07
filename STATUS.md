@@ -1,17 +1,23 @@
 # STATUS
 
 ## Current milestone
-Milestone 1 — browser-playable MVP
+W1/W2 — minimum viable WeChat adaptation
 
 ## Current status
-- shared core 已替换为口算题目生成 / 答题判定 / 奖励规则
-- web 端已实现首页、设置、逐题答题、即时反馈、结果领奖页
-- 支持加减乘除多选、快速开始、自定义设置
-- 采用儿童友好的大按钮数字键盘输入
-- 轻量规则测试已补充
+- `game-core` remains shared and platform-neutral
+- H5/browser preview remains available through `platform-web`
+- `platform-wechat` now has a minimal Canvas 2D shell using shared `GameRuntime`
+- WeChat adapter covers storage, lifecycle, input snapshot, and safe short haptic tap feedback
+- Touch hit testing supports operation selection, difficulty selection, numeric keypad, submit, feedback next, replay, and home
+- `npm run build:wechat` produces `dist-wechat/` with `game.js`, `game.json`, and `project.config.json`
+
+## Current limitations
+- WeChat side is MVP Canvas UI, not final visual polish
+- Ads, login, leaderboards, remote code/CDN, and release automation are out of scope
+- `project.config.json` uses `touristappid`; replace with a real AppID before release/device workflows
 
 ## Acceptance notes
-- `npm install` ✅
 - `npm test` ✅
 - `npm run build` ✅
-- 本地 dev server 已可启动，适合浏览器试玩
+- `npm run build:wechat` ✅
+- `dist-wechat/` output inspected ✅

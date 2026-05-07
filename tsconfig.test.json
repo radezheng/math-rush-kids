@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": ".tmp-test",
+    "module": "ESNext",
+    "target": "ES2020",
+    "moduleResolution": "Bundler"
+  },
+  "include": [
+    "game-core/src/gameplay/mathRush.ts",
+    "game-core/src/gameplay/mathRush.test.ts",
+    "platform-wechat/src/canvasShell.ts",
+    "platform-wechat/src/canvasShell.test.ts"
+  ]
+}

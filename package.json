@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "test": "rm -rf .tmp-test && tsc --outDir .tmp-test --module ESNext --target ES2020 --moduleResolution bundler game-core/src/gameplay/mathRush.ts game-core/src/gameplay/mathRush.test.ts && node --experimental-specifier-resolution=node .tmp-test/mathRush.test.js"
+    "test": "rm -rf .tmp-test && tsc -p tsconfig.test.json && node --experimental-specifier-resolution=node .tmp-test/game-core/src/gameplay/mathRush.test.js && node .tmp-test/platform-wechat/src/canvasShell.test.js",
+    "build:wechat": "tsc -b && vite build --config platform-wechat/vite.config.ts && node scripts/prepare-wechat.mjs"
   },
   "devDependencies": {
+    "@types/node": "^25.6.0",
     "typescript": "^5.9.3",
     "vite": "^7.1.7"
   }

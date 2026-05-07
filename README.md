@@ -1,13 +1,10 @@
 # Math Rush Kids · 口算冲冲冲
 
-一个面向小学生的浏览器口算小游戏 MVP。
+一个面向小学生的口算小游戏 MVP，当前支持 H5/browser 预览和最小可玩的微信小游戏 Canvas shell。
 
-## Milestone 1 已完成
-
-当前版本提供：
+## 当前版本提供
 - 首页运算选择：加 / 减 / 乘 / 除，支持多选
 - 快速开始：默认 10 道、20 以内、普通难度
-- 自定义设置：题数、数值范围、难度
 - 逐题答题：大号数字输入区 + 儿童友好的数字键盘
 - 即时鼓励：每题提交后给出温和反馈
 - 连对奖励：3 / 5 / 8 连对触发额外鼓励
@@ -20,11 +17,10 @@
 - 默认档：10 道、20 以内、普通难度
 
 ## 架构
-- `game-core/`：题目生成、答题判定、奖励规则、会话状态
-- `platform-web/`：浏览器 UI、数字键盘、页面流转
-- `platform-wechat/` / `platform-douyin/`：保留平台适配入口
-
-当前输入层是“数字键盘答题”。后续如要接入手写模式，可继续沿用 `game-core` 的出题 / 判定 / 奖励逻辑，只替换 web shell 的输入组件。
+- `game-core/`：共享题目生成、答题判定、奖励规则、会话状态；不得依赖 `window` / `document` / `wx` / `tt`
+- `platform-web/`：浏览器 H5 / studio 预览 UI
+- `platform-wechat/`：微信小游戏 Canvas shell、`wx` 存储/生命周期/轻触震动适配、项目配置模板
+- `platform-douyin/`：预留平台适配入口
 
 ## Commands
 
@@ -32,5 +28,13 @@
 npm install
 npm test
 npm run build
+npm run build:wechat
 npm run dev -- --host 127.0.0.1 --port 4273
 ```
+
+## 微信开发者工具导入
+1. 运行 `npm run build:wechat`。
+2. 用微信开发者工具导入 `dist-wechat/`。
+3. 项目类型选择小游戏；当前 `appid` 是 `touristappid`，真机/发布前换成正式 AppID。
+
+当前限制：微信端仅实现 Canvas 2D 最小可玩闭环；广告、登录、排行榜不在本轮范围；分享/音频为安全轻量 stub，点击反馈优先使用短震动。
