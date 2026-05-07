@@ -441,34 +441,37 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   }
   function addHomeTargets(targets, state, width, height, topInset, settingsExpanded) {
     const sections = measureHomeSections(width, height, topInset, settingsExpanded);
-    const gap = 10;
+    const { gap, operationCardHeight, operationGap, operationRowStep, scale } = sections.metrics;
     targets.push({ ...sections.stats, label: "最高记录 / 排行榜", action: { type: "home" }, disabled: true });
     targets.push({ ...sections.settingsToggle, label: "练习设置", action: { type: "toggle-settings" } });
     if (settingsExpanded) {
-      const rowTop = sections.settingsPanel.y + 64;
-      addStepperTargets(targets, "题数", "adjust-question-count", state.settings.questionCount, QUESTION_COUNT_MIN, QUESTION_COUNT_MAX, sections.settingsPanel.x + 124, rowTop, sections.settingsPanel.width - 124);
-      addStepperTargets(targets, "数字范围", "adjust-max-number", state.settings.maxNumber, MAX_NUMBER_MIN, MAX_NUMBER_MAX, sections.settingsPanel.x + 124, rowTop + 44, sections.settingsPanel.width - 124);
+      const rowTop = sections.settingsPanel.y + sections.settingsToggle.height + gap;
+      const stepperX = sections.settingsPanel.x + Math.round(112 * scale);
+      const stepperWidth = sections.settingsPanel.width - Math.round(112 * scale);
+      const rowStep = Math.round(40 * scale);
+      addStepperTargets(targets, "题数", "adjust-question-count", state.settings.questionCount, QUESTION_COUNT_MIN, QUESTION_COUNT_MAX, stepperX, rowTop, stepperWidth, scale);
+      addStepperTargets(targets, "数字范围", "adjust-max-number", state.settings.maxNumber, MAX_NUMBER_MIN, MAX_NUMBER_MAX, stepperX, rowTop + rowStep, stepperWidth, scale);
       const pillWidth = (sections.settingsPanel.width - gap * 2) / 3;
       DIFFICULTY_META.forEach((difficulty, index) => {
         targets.push({
           x: sections.settingsPanel.x + index * (pillWidth + gap),
-          y: sections.settingsPanel.y + 148,
+          y: rowTop + rowStep + Math.round(40 * scale),
           width: pillWidth,
-          height: 32,
+          height: Math.round(30 * scale),
           label: difficulty.label,
           action: { type: "set-difficulty", difficulty: difficulty.id }
         });
       });
     }
-    const cardWidth = (sections.operations.width - gap) / 2;
+    const cardWidth = (sections.operations.width - operationGap) / 2;
     OPERATION_META.forEach((operation, index) => {
       const col = index % 2;
       const row = Math.floor(index / 2);
       targets.push({
-        x: sections.operations.x + col * (cardWidth + gap),
-        y: sections.operations.y + row * 56,
+        x: sections.operations.x + col * (cardWidth + operationGap),
+        y: sections.operations.y + row * operationRowStep,
         width: cardWidth,
-        height: 48,
+        height: operationCardHeight,
         label: operation.label,
         action: { type: "toggle-operation", operation: operation.id }
       });
@@ -476,34 +479,79 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     targets.push({ ...sections.start, label: "快速开始", action: { type: "start" }, disabled: state.settings.operations.length === 0 });
     targets.push({ ...sections.ad, label: "广告位预留", action: { type: "home" }, disabled: true });
   }
-  function measureHomeSections(width, height, topInset, settingsExpanded) {
-    const margin = 28;
+  function measureHomeMetrics(width, height, topInset, settingsExpanded) {
+    const availableHeight = Math.max(360, height - topInset);
+    const scale = Math.max(0.72, Math.min(1, availableHeight / 620));
+    const compact = scale < 0.96 || width <= 375;
+    const margin = compact ? 24 : 28;
     const contentWidth = width - margin * 2;
-    const compact = height <= 700;
-    const gap = compact ? 8 : 10;
-    const heroHeight = compact ? 48 : 60;
-    const statsHeight = compact ? 48 : 56;
-    const settingsHeight = settingsExpanded ? compact ? 188 : 196 : 58;
-    const operationsHeight = 104;
-    const startHeight = 52;
-    const adHeight = 44;
-    let cursor = topInset + (compact ? 46 : 62);
-    const hero = { x: margin - 6, y: cursor, width: contentWidth + 12, height: heroHeight };
-    cursor += heroHeight + gap;
-    const stats = { x: margin, y: cursor, width: contentWidth, height: statsHeight };
-    cursor += statsHeight + gap;
-    const settingsPanel = { x: margin, y: cursor, width: contentWidth, height: settingsHeight };
-    const settingsToggle = { x: margin, y: cursor, width: contentWidth, height: 58 };
-    cursor += settingsHeight + gap + 18;
-    const operations = { x: margin, y: cursor, width: contentWidth, height: operationsHeight };
-    cursor += operationsHeight + gap;
-    const start = { x: margin, y: cursor, width: contentWidth, height: startHeight };
-    cursor += startHeight + gap;
-    const ad = { x: margin, y: cursor, width: contentWidth, height: adHeight };
-    return { hero, stats, settingsPanel, settingsToggle, operations, start, ad };
+    const gap = Math.max(5, Math.round(10 * scale));
+    const operationGap = Math.max(6, Math.round(10 * scale));
+    const heroHeight = Math.round((settingsExpanded ? 40 : 48) * scale);
+    const statsHeight = Math.round((settingsExpanded ? 38 : 48) * scale);
+    const settingsHeight = settingsExpanded ? Math.round(160 * scale) : Math.round(54 * scale);
+    const settingsToggleHeight = Math.min(settingsHeight, Math.round(54 * scale));
+    const operationCardHeight = Math.round(44 * scale);
+    const operationRowStep = operationCardHeight + Math.max(5, Math.round(8 * scale));
+    const operationsHeight = operationRowStep + operationCardHeight;
+    const startHeight = Math.round(50 * scale);
+    const adHeight = Math.round(42 * scale);
+    const adBottomMargin = Math.max(12, Math.min(16, Math.round(14 * scale)));
+    return {
+      margin,
+      contentWidth,
+      gap,
+      operationGap,
+      heroHeight,
+      statsHeight,
+      settingsHeight,
+      settingsToggleHeight,
+      operationsHeight,
+      operationCardHeight,
+      operationRowStep,
+      startHeight,
+      adHeight,
+      adBottomMargin,
+      scale,
+      compact
+    };
   }
-  function addStepperTargets(targets, label, actionType, value, min, max, x, y, width) {
-    const buttonSize = 40;
+  function measureHomeSections(width, height, topInset, settingsExpanded) {
+    const metrics = measureHomeMetrics(width, height, topInset, settingsExpanded);
+    const { margin, contentWidth, gap } = metrics;
+    const ad = {
+      x: margin,
+      y: height - metrics.adBottomMargin - metrics.adHeight,
+      width: contentWidth,
+      height: metrics.adHeight
+    };
+    const start = {
+      x: margin,
+      y: ad.y - gap - metrics.startHeight,
+      width: contentWidth,
+      height: metrics.startHeight
+    };
+    const operations = {
+      x: margin,
+      y: start.y - gap - metrics.operationsHeight,
+      width: contentWidth,
+      height: metrics.operationsHeight
+    };
+    const minContentTop = topInset + Math.round((settingsExpanded ? 28 : 42) * metrics.scale);
+    const fixedBottom = operations.y;
+    const naturalHeight = metrics.heroHeight + gap + metrics.statsHeight + gap + metrics.settingsHeight + gap;
+    const extraSpace = Math.max(0, fixedBottom - minContentTop - naturalHeight);
+    let cursor = minContentTop + Math.min(extraSpace, Math.round(18 * metrics.scale));
+    const hero = { x: margin - 4, y: cursor, width: contentWidth + 8, height: metrics.heroHeight };
+    cursor += metrics.heroHeight + gap;
+    const stats = { x: margin, y: cursor, width: contentWidth, height: metrics.statsHeight };
+    cursor += metrics.statsHeight + gap;
+    const settingsPanel = { x: margin, y: cursor, width: contentWidth, height: metrics.settingsHeight };
+    const settingsToggle = { x: margin, y: cursor, width: contentWidth, height: metrics.settingsToggleHeight };
+    return { hero, stats, settingsPanel, settingsToggle, operations, start, ad, metrics };
+  }
+  function addStepperTargets(targets, label, actionType, value, min, max, x, y, width, scale = 1) {
+    const buttonSize = Math.round(38 * scale);
     const plusAction = actionType === "adjust-question-count" ? { type: "adjust-question-count", delta: SETTING_STEP } : { type: "adjust-max-number", delta: SETTING_STEP };
     const minusAction = actionType === "adjust-question-count" ? { type: "adjust-question-count", delta: -SETTING_STEP } : { type: "adjust-max-number", delta: -SETTING_STEP };
     targets.push({ x, y, width: buttonSize, height: buttonSize, label: `${label} -`, action: minusAction, disabled: value <= min });
@@ -549,56 +597,71 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   }
   function drawHome(ctx, state, layout) {
     const sections = measureHomeSections(layout.width, layout.height, layout.topInset, layout.settingsExpanded);
+    const { scale, compact, gap } = sections.metrics;
+    const leftPadding = Math.round(16 * scale);
+    const heroTitleSize = Math.round((compact ? 15 : 17) * scale);
+    const bodySize = Math.round((compact ? 11 : 13) * scale);
+    const labelSize = Math.round((compact ? 12 : 14) * scale);
+    const buttonSize = Math.round((compact ? 14 : 16) * scale);
     panel(ctx, sections.hero.x, sections.hero.y, sections.hero.width, sections.hero.height, "#ffffffcc");
-    text(ctx, "选择运算，马上开始练习", sections.hero.x + 20, sections.hero.y + 18, 17, "#26304f", "bold");
-    text(ctx, `${state.settings.questionCount} 题 · ${state.settings.maxNumber} 以内 · ${difficultyLabel(state.settings.difficulty)} · ${formatOperationsSummary(state.settings.operations)}`, sections.hero.x + 20, sections.hero.y + 38, 12, "#65708f");
+    text(ctx, compact ? "选择运算开始练习" : "选择运算，马上开始练习", sections.hero.x + leftPadding, sections.hero.y + Math.round(15 * scale), heroTitleSize, "#26304f", "bold");
+    text(ctx, formatHeroSummary(state, compact), sections.hero.x + leftPadding, sections.hero.y + Math.round(34 * scale), bodySize, "#65708f");
     panel(ctx, sections.stats.x, sections.stats.y, sections.stats.width, sections.stats.height, "#ffffffd9");
-    text(ctx, "最高记录", sections.stats.x + 16, sections.stats.y + 18, 14, "#26304f", "bold");
-    text(ctx, `${state.bestStars || 0} 星 · ${Math.round(state.bestAccuracy * 100)}%`, sections.stats.x + 16, sections.stats.y + 36, 13, "#65708f");
-    text(ctx, "排行榜", sections.stats.x + sections.stats.width - 16, sections.stats.y + 18, 14, "#26304f", "bold", "right");
-    text(ctx, "即将接入", sections.stats.x + sections.stats.width - 16, sections.stats.y + 36, 13, "#9aa3bd", "normal", "right");
+    text(ctx, "最高记录", sections.stats.x + leftPadding, sections.stats.y + Math.round(15 * scale), labelSize, "#26304f", "bold");
+    text(ctx, `${state.bestStars || 0} 星 · ${Math.round(state.bestAccuracy * 100)}%`, sections.stats.x + leftPadding, sections.stats.y + Math.round(32 * scale), bodySize, "#65708f");
+    text(ctx, "排行", sections.stats.x + sections.stats.width - leftPadding, sections.stats.y + Math.round(15 * scale), labelSize, "#26304f", "bold", "right");
+    text(ctx, "待接入", sections.stats.x + sections.stats.width - leftPadding, sections.stats.y + Math.round(32 * scale), bodySize, "#9aa3bd", "normal", "right");
     const settingsToggle = layout.targets.find((item) => item.action.type === "toggle-settings");
     if (settingsToggle) {
-      panel(ctx, sections.settingsPanel.x - 4, sections.settingsPanel.y - 4, sections.settingsPanel.width + 8, sections.settingsPanel.height + 8, "#ffffffd9");
-      text(ctx, "练习设置", settingsToggle.x + 16, settingsToggle.y + 20, 15, "#26304f", "bold");
-      text(ctx, formatSettingsSummary(state), settingsToggle.x + 16, settingsToggle.y + 43, 13, "#65708f");
-      text(ctx, layout.settingsExpanded ? "收起" : "展开", settingsToggle.x + settingsToggle.width - 18, settingsToggle.y + 30, 14, "#5b7cfa", "bold", "right");
+      panel(ctx, sections.settingsPanel.x - 3, sections.settingsPanel.y - 3, sections.settingsPanel.width + 6, sections.settingsPanel.height + 6, "#ffffffd9");
+      text(ctx, "练习设置", settingsToggle.x + leftPadding, settingsToggle.y + Math.round(16 * scale), labelSize, "#26304f", "bold");
+      text(ctx, formatSettingsSummary(state, compact), settingsToggle.x + leftPadding, settingsToggle.y + Math.round(36 * scale), bodySize, "#65708f");
+      text(ctx, layout.settingsExpanded ? "收起" : "展开", settingsToggle.x + settingsToggle.width - leftPadding, settingsToggle.y + Math.round(26 * scale), labelSize, "#5b7cfa", "bold", "right");
     }
     if (layout.settingsExpanded && settingsToggle) {
-      text(ctx, "题数", settingsToggle.x + 16, settingsToggle.y + 84, 14, "#26304f", "bold");
-      text(ctx, `${state.settings.questionCount} 题`, layout.width / 2, settingsToggle.y + 84, 16, "#26304f", "bold", "center");
-      text(ctx, "数字范围", settingsToggle.x + 16, settingsToggle.y + 134, 14, "#26304f", "bold");
-      text(ctx, `${state.settings.maxNumber} 以内`, layout.width / 2, settingsToggle.y + 134, 16, "#26304f", "bold", "center");
-      text(ctx, "难度", settingsToggle.x + 16, settingsToggle.y + 164, 14, "#26304f", "bold");
+      const questionMinus = layout.targets.find((item) => item.action.type === "adjust-question-count" && item.action.delta < 0);
+      const maxMinus = layout.targets.find((item) => item.action.type === "adjust-max-number" && item.action.delta < 0);
+      const firstDifficulty = layout.targets.find((item) => item.action.type === "set-difficulty");
+      if (questionMinus) {
+        text(ctx, "题数", settingsToggle.x + leftPadding, questionMinus.y + questionMinus.height / 2, labelSize, "#26304f", "bold");
+        text(ctx, `${state.settings.questionCount}题`, layout.width / 2, questionMinus.y + questionMinus.height / 2, labelSize, "#26304f", "bold", "center");
+      }
+      if (maxMinus) {
+        text(ctx, "范围", settingsToggle.x + leftPadding, maxMinus.y + maxMinus.height / 2, labelSize, "#26304f", "bold");
+        text(ctx, `${state.settings.maxNumber}内`, layout.width / 2, maxMinus.y + maxMinus.height / 2, labelSize, "#26304f", "bold", "center");
+      }
+      if (firstDifficulty) {
+        text(ctx, "难度", settingsToggle.x + leftPadding, firstDifficulty.y - Math.max(7, gap), labelSize, "#26304f", "bold");
+      }
       for (const target of layout.targets.filter((item) => item.action.type === "adjust-question-count" || item.action.type === "adjust-max-number")) {
         button(ctx, target, target.disabled ? "#e0e5f2" : "#ffffffee", target.disabled ? "#a8b0c8" : "#26304f");
-        text(ctx, target.label.endsWith("+") ? "+" : "−", target.x + target.width / 2, target.y + 23, 22, target.disabled ? "#a8b0c8" : "#26304f", "bold", "center");
+        text(ctx, target.label.endsWith("+") ? "+" : "−", target.x + target.width / 2, target.y + target.height / 2, Math.round(21 * scale), target.disabled ? "#a8b0c8" : "#26304f", "bold", "center");
       }
       for (const target of layout.targets.filter((item) => item.action.type === "set-difficulty")) {
         const action = target.action;
         const active = action.type === "set-difficulty" && state.settings.difficulty === action.difficulty;
         button(ctx, target, active ? "#ff8a4c" : "#ffffffee", active ? "#ffffff" : "#26304f");
-        text(ctx, target.label, target.x + target.width / 2, target.y + 24, 14, active ? "#ffffff" : "#26304f", "bold", "center");
+        text(ctx, target.label, target.x + target.width / 2, target.y + target.height / 2, labelSize, active ? "#ffffff" : "#26304f", "bold", "center");
       }
     }
     const firstOperation = layout.targets.find((item) => item.action.type === "toggle-operation");
     if (firstOperation) {
-      text(ctx, "选择运算", 28, firstOperation.y - 14, 16, "#26304f", "bold");
+      text(ctx, "选择运算", 24, firstOperation.y - Math.max(9, gap), labelSize, "#26304f", "bold");
     }
     for (const target of layout.targets.filter((item) => item.action.type === "toggle-operation")) {
       const action = target.action;
       const meta = action.type === "toggle-operation" ? OPERATION_META.find((item) => item.id === action.operation) : void 0;
       const active = action.type === "toggle-operation" && state.settings.operations.includes(action.operation);
       button(ctx, target, active ? "#5b7cfa" : "#ffffffd9", active ? "#ffffff" : "#26304f");
-      text(ctx, `${meta?.icon ?? ""} ${target.label}`, target.x + target.width / 2, target.y + 30, 16, active ? "#ffffff" : "#26304f", "bold", "center");
+      text(ctx, `${meta?.icon ?? ""} ${compact ? shortOperationLabel(target.label) : target.label}`, target.x + target.width / 2, target.y + target.height / 2, buttonSize, active ? "#ffffff" : "#26304f", "bold", "center");
     }
     const start = layout.targets.find((item) => item.action.type === "start");
     if (start) {
       button(ctx, start, start.disabled ? "#b8c0d8" : "#13b981", "#ffffff");
-      text(ctx, start.disabled ? "至少选择一种运算" : "🚀 快速开始", start.x + start.width / 2, start.y + 32, 18, "#ffffff", "bold", "center");
+      text(ctx, start.disabled ? "至少选一种" : "🚀 快速开始", start.x + start.width / 2, start.y + start.height / 2, Math.round(17 * scale), "#ffffff", "bold", "center");
     }
     panel(ctx, sections.ad.x, sections.ad.y, sections.ad.width, sections.ad.height, "rgba(255,255,255,0.45)");
-    text(ctx, "广告位预留", layout.width / 2, sections.ad.y + sections.ad.height / 2, 14, "#9aa3bd", "bold", "center");
+    text(ctx, "广告位预留", layout.width / 2, sections.ad.y + sections.ad.height / 2, labelSize, "#9aa3bd", "bold", "center");
   }
   function drawQuestion(ctx, state, layout) {
     const question = state.question;
@@ -706,12 +769,22 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   function difficultyLabel(difficulty) {
     return DIFFICULTY_META.find((item) => item.id === difficulty)?.label ?? "普通";
   }
-  function formatOperationsSummary(operations) {
+  function formatOperationsSummary(operations, compact = false) {
     if (operations.length === 0) return "未选运算";
-    return operations.map((operation) => operationLabel(operation)).join(" / ");
+    const labels = operations.map((operation) => operationLabel(operation));
+    return compact ? labels.join("/") : labels.join(" / ");
   }
-  function formatSettingsSummary(state) {
+  function formatHeroSummary(state, compact = false) {
+    return [`${state.settings.questionCount}题`, `${state.settings.maxNumber}内`, difficultyLabel(state.settings.difficulty), formatOperationsSummary(state.settings.operations, compact)].join(" · ");
+  }
+  function formatSettingsSummary(state, compact = false) {
+    if (compact) {
+      return `${state.settings.questionCount}题 / ${state.settings.maxNumber}内 / ${difficultyLabel(state.settings.difficulty)} / ${formatOperationsSummary(state.settings.operations, true)}`;
+    }
     return `${state.settings.questionCount} 题 / ${state.settings.maxNumber} 以内 / ${difficultyLabel(state.settings.difficulty)} / ${formatOperationsSummary(state.settings.operations)}`;
+  }
+  function shortOperationLabel(label) {
+    return label.replace("法", "");
   }
   function getWx() {
     return typeof wx === "undefined" ? void 0 : wx;

@@ -39,6 +39,22 @@ function assertNoOverlap(targets: RectLike[], message: string): void {
   }
 }
 
+function assertWithinViewport(layout: ReturnType<typeof createWeChatLayout>, message: string): void {
+  for (const target of layout.targets) {
+    assert(target.x >= 0, `${message}: ${target.label} starts before left edge`);
+    assert(target.y >= layout.topInset, `${message}: ${target.label} starts above safe content`);
+    assert(target.x + target.width <= layout.width, `${message}: ${target.label} exceeds right edge`);
+    assert(bottom(target) <= layout.height, `${message}: ${target.label} exceeds bottom edge`);
+  }
+}
+
+function assertAdPinnedNearBottom(layout: ReturnType<typeof createWeChatLayout>, message: string): void {
+  const adSlot = layout.targets.find((item) => item.label === '广告位预留');
+  assert(adSlot?.disabled, `${message}: missing disabled ad slot`);
+  const bottomMargin = layout.height - bottom(adSlot!);
+  assert(bottomMargin >= 12 && bottomMargin <= 16, `${message}: ad slot bottom margin should be 12-16, got ${bottomMargin}`);
+}
+
 function assertQuickStartOrder(layout: ReturnType<typeof createWeChatLayout>, message: string): void {
   const start = layout.targets.find((item) => item.action.type === 'start');
   const operations = layout.targets.filter((item) => item.action.type === 'toggle-operation');
@@ -86,6 +102,8 @@ assertEqual(hitTest(homeLayout, defaultStart!.x + defaultStart!.width / 2, defau
 const safeCollapsedHomeLayout = createWeChatLayout(baseState, 375, 667, { topInset: 70, settingsExpanded: false });
 assertEqual(safeCollapsedHomeLayout.topInset, 70);
 assertNoOverlap(safeCollapsedHomeLayout.targets, 'collapsed 375x667 safe-area home targets should not overlap');
+assertWithinViewport(safeCollapsedHomeLayout, 'collapsed 375x667 safe-area home targets should fit viewport');
+assertAdPinnedNearBottom(safeCollapsedHomeLayout, 'collapsed 375x667 safe-area home');
 const collapsedStats = safeCollapsedHomeLayout.targets.find((item) => item.label === '最高记录 / 排行榜');
 const collapsedAdSlot = safeCollapsedHomeLayout.targets.find((item) => item.label === '广告位预留');
 assert(collapsedStats?.disabled, 'home should include a disabled compact record/leaderboard stats card');
@@ -103,6 +121,8 @@ assert(shiftedOperation && shiftedOperation.y >= 260, 'safe-area home operation 
 
 const expandedHomeLayout = createWeChatLayout(baseState, 375, 667, { topInset: 70, settingsExpanded: true });
 assertNoOverlap(expandedHomeLayout.targets, 'expanded 375x667 safe-area home targets should not overlap');
+assertWithinViewport(expandedHomeLayout, 'expanded 375x667 safe-area home targets should fit viewport');
+assertAdPinnedNearBottom(expandedHomeLayout, 'expanded 375x667 safe-area home');
 const expandedAdSlot = expandedHomeLayout.targets.find((item) => item.label === '广告位预留');
 assert(expandedAdSlot?.disabled, 'expanded home should keep a disabled bottom ad slot placeholder');
 const questionPlus = expandedHomeLayout.targets.find((item) => item.action.type === 'adjust-question-count' && item.action.delta === 5);
@@ -122,6 +142,15 @@ assert(expandedHomeLayout.targets.some((item) => item.action.type === 'set-diffi
 const expandedStart = expandedHomeLayout.targets.find((item) => item.action.type === 'start');
 assert(expandedStart && expandedStart.y + expandedStart.height <= expandedHomeLayout.height - 20, 'expanded home quick start should fit on 375x667');
 assertQuickStartOrder(expandedHomeLayout, 'expanded 375x667 safe-area home');
+
+const compactExpandedHomeLayout = createWeChatLayout(baseState, 360, 640, { topInset: 80, settingsExpanded: true });
+assertNoOverlap(compactExpandedHomeLayout.targets, 'expanded 360x640 safe-area home targets should not overlap');
+assertWithinViewport(compactExpandedHomeLayout, 'expanded 360x640 safe-area home targets should fit viewport');
+assertAdPinnedNearBottom(compactExpandedHomeLayout, 'expanded 360x640 safe-area home');
+assertQuickStartOrder(compactExpandedHomeLayout, 'expanded 360x640 safe-area home');
+assert(compactExpandedHomeLayout.targets.some((item) => item.action.type === 'adjust-question-count'), 'compact expanded settings should keep question count controls');
+assert(compactExpandedHomeLayout.targets.some((item) => item.action.type === 'adjust-max-number'), 'compact expanded settings should keep max number controls');
+assert(compactExpandedHomeLayout.targets.some((item) => item.action.type === 'set-difficulty'), 'compact expanded settings should keep difficulty choices');
 
 const questionLayout = createWeChatLayout(
   {
